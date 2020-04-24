@@ -43,6 +43,10 @@ public class MSMSReader {
         String[] files = myDirectory.list();
         for (String file : files) {
             //System.out.println(file);
+            int z = file.indexOf(".xml");
+            if (z != -1) {
+
+            }
         }
     }
 
@@ -59,11 +63,8 @@ public class MSMSReader {
         // Split by _
         File myDirectory = new File(myPath);
         String[] files = myDirectory.list();
-        for (String file : files) {
-            //System.out.println(file);
-        }
 
-        File myFile = new File(myPath, "2_Mouse_Brain_1.xlsx");
+        File myFile = new File(myPath, "1_Mouse_Adrenal gland_1.xlsx");
 
         FileInputStream fis = new FileInputStream(myFile);
         // Return first sheet
@@ -75,103 +76,129 @@ public class MSMSReader {
             XSSFSheet mySheet = myWorkBook.getSheetAt(0);
             Iterator<Row> rowIterator = mySheet.iterator();
             int i = 0;
-            int k = 0;
-            int j = 0;
+            int k;
+            int rowNumb = 0;
+            int x;
             Elemento arrayObjetos[] = new Elemento[5000];
+
             while (rowIterator.hasNext()) {
                 Elemento e = new Elemento();
-                // Peak peak = new Peak();
+
                 Row row = rowIterator.next();
                 // For each row, iterate through each columns
                 Iterator<Cell> cellIterator = row.cellIterator();
-                if (j >= 11) {
-                    while (cellIterator.hasNext()) {
+                if (rowNumb >= 10 && rowNumb <= mySheet.getLastRowNum()) {
+                    /*if (rowNumb == 639 || rowNumb == 638) {
+                        System.out.println("ROW NUM: " + rowNumb);
+                        System.out.println("Row size: " + row.getCell(30));
+                    }*/
+ /* while (cellIterator.hasNext()) {
                         //System.out.print(k + "\t");
-                        Cell cell = cellIterator.next();
-                        switch (k) {
-                            case 1:
-                                //System.out.print("AVERAGE RETENTION TIME:" + cell.getStringCellValue() + "\t");
-                                e.setRetentiontime(cell.getNumericCellValue());
-                                break;
-                            case 3:
-                                //System.out.print("NAME:" + cell.getStringCellValue() + "\t");
-                                e.setName(cell.getStringCellValue());
-                                break;
-                            case 4:
-                                // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
-                                e.setAdduct(cell.getStringCellValue());
-                                String w = cell.getStringCellValue();
-                                try {
-                                    w = w.substring(w.length() - 1, w.length());
-                                    e.setIonMode(w);
-                                } catch (Exception a) {
-                                    System.out.println("\n aduct" + a.getMessage());
-                                }
 
-                                break;
-                            case 10:
-                                // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
-                                e.setFormula(cell.getStringCellValue());
-                                break;
-                            case 11:
-                                //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
-                                e.setOntology(cell.getStringCellValue());
-                                break;
-                            case 13:
-                                // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
-                                e.setSmiles(cell.getStringCellValue());
-                                break;
+                        Cell cell = cellIterator.next();*/
+                    for (k = 0; k <= row.getLastCellNum(); k++) {
+                        Cell cell = row.getCell(k);
+                        try {
+                            switch (k) {
+                                case 1:
+                                    Double f;
+                                    f = cell.getNumericCellValue();
+                                    //System.out.print("AVERAGE RETENTION TIME:" + cell.getStringCellValue() + "\t");
+                                    if (f != null) {
+                                        e.setRetentiontime(cell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 3:
+                                    //System.out.print("NAME:" + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setName(cell.getStringCellValue());
+                                    }
+                                    break;
+                                case 4:
+                                    // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setAdduct(cell.getStringCellValue());
+                                        String w = cell.getStringCellValue();
+                                        try {
+                                            w = w.substring(w.length() - 1, w.length());
+                                            e.setIonMode(w);
+                                        } catch (Exception a) {
+                                            System.out.println("\n aduct " + a.getMessage());
+                                            System.out.println("row " + rowNumb);
+                                            System.out.println("column: " + k);
+                                        }
+                                    }
+                                    break;
+                                case 10:
+                                    // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setFormula(cell.getStringCellValue());
+                                    }
+                                    break;
+                                case 11:
+                                    //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setOntology(cell.getStringCellValue());
+                                    }
+                                    break;
+                                case 13:
+                                    // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setSmiles(cell.getStringCellValue());
+                                    }
+                                    break;
 
-                            case 12:
-                                //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
-                                e.setInchikey(cell.getStringCellValue());
-                                break;
-                            case 30:
-                                //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
+                                case 12:
+                                    //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        e.setInchikey(cell.getStringCellValue());
+                                    }
+                                    break;
+                                case 30:
+                                    //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
+                                    if (cell.getStringCellValue() != null) {
+                                        try {
 
-                                /*switch (cell.getCellTypeEnum()) {
-                                    case NUMERIC:
-                                        // System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
-                                        double n = cell.getNumericCellValue();
-                                        String s = String.valueOf(n);
-                                        System.out.println(n);
-                                        //if (s.isEmpty() == false) {
-                                        //System.out.println(p);
-                                        //Picos h = new Picos();
-                                        getPeakIntensitytoFromString(s, e);
-                                        // System.out.println(h);
-                                        //e.setPeaks(h);
-                                        //}
+                                            String p = cell.getStringCellValue();
+                                            if (p.isEmpty() == false) {
+                                                //System.out.println(p);
+                                                //Picos h = new Picos();
+                                                getPeakIntensitytoFromString(p, e);
+                                                // System.out.println(h);
+                                                //e.setPeaks(h);
+                                            }
+
+                                        } catch (Exception a) {
+                                            System.out.println("\n" + a.getMessage());
+                                            System.out.println(e);
+                                            System.out.println("CELL: " + cell.toString());
+                                            System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
+                                            System.out.println("row " + rowNumb);
+                                            System.out.println("column: " + k);
+                                        }
                                         break;
-                                    case STRING:*/
-                                try {
-                                String p = cell.getStringCellValue();
-                                if (p.isEmpty() == false) {
-                                    //System.out.println(p);
-                                    //Picos h = new Picos();
-                                    getPeakIntensitytoFromString(p, e);
-                                    // System.out.println(h);
-                                    //e.setPeaks(h);
-                                }
-                            } catch (Exception a) {
-                                System.out.println("\n" + a.getMessage());
+                                    }
+
+                                default:
                             }
-                            break;
-                            // }
-
-                            //break;
-                            default:
+                        } catch (Exception a) {
+                            System.out.println("\n" + a.getMessage());
                         }
-                        k++;
+                        //k++;
                     }
-                    System.out.println("\n");
-                    System.out.println(e);
-                    arrayObjetos[i] = e;
-                    k = 0;
-
+                    try {
+                        System.out.println("\n");
+                        System.out.println(e);
+                        arrayObjetos[i] = e;
+                    } catch (Exception a) {
+                        System.out.println("\n" + a.getMessage());
+                    }
+                    // k = 0;
+                    System.out.println(i + 1);
+                    System.out.println(mySheet.getLastRowNum() - 9);
                     i++;
                 }
-                j++;
+                rowNumb++;
 
             }
         }
