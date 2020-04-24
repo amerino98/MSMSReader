@@ -84,7 +84,7 @@ public class MSMSReader {
                 Row row = rowIterator.next();
                 // For each row, iterate through each columns
                 Iterator<Cell> cellIterator = row.cellIterator();
-                if (j >= 10) {
+                if (j >= 11) {
                     while (cellIterator.hasNext()) {
                         //System.out.print(k + "\t");
                         Cell cell = cellIterator.next();
@@ -101,16 +101,20 @@ public class MSMSReader {
                                 // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
                                 e.setAdduct(cell.getStringCellValue());
                                 String w = cell.getStringCellValue();
-                                int m = w.length();
-                                w = w.substring(m - 1, m);
-                                e.setIonMode(w);
+                                try {
+                                    w = w.substring(w.length() - 1, w.length());
+                                    e.setIonMode(w);
+                                } catch (Exception a) {
+                                    System.out.println("\n aduct" + a.getMessage());
+                                }
+
                                 break;
                             case 10:
                                 // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
                                 e.setFormula(cell.getStringCellValue());
                                 break;
                             case 11:
-                                // System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
+                                //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
                                 e.setOntology(cell.getStringCellValue());
                                 break;
                             case 13:
@@ -125,33 +129,37 @@ public class MSMSReader {
                             case 30:
                                 //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
 
-                                switch (cell.getCellTypeEnum()) {
+                                /*switch (cell.getCellTypeEnum()) {
                                     case NUMERIC:
+                                        // System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
                                         double n = cell.getNumericCellValue();
                                         String s = String.valueOf(n);
                                         System.out.println(n);
-                                        if (s.isEmpty() == false) {
-                                            //System.out.println(p);
-                                            //Picos h = new Picos();
-                                            getPeakIntensitytoFromString(s, e);
-                                            // System.out.println(h);
-                                            //e.setPeaks(h);
-                                        }
+                                        //if (s.isEmpty() == false) {
+                                        //System.out.println(p);
+                                        //Picos h = new Picos();
+                                        getPeakIntensitytoFromString(s, e);
+                                        // System.out.println(h);
+                                        //e.setPeaks(h);
+                                        //}
                                         break;
-                                    case STRING:
-                                        String p = cell.getStringCellValue();
-                                        if (p.isEmpty() == false) {
-                                            //System.out.println(p);
-                                            //Picos h = new Picos();
-                                            getPeakIntensitytoFromString(p, e);
-                                            // System.out.println(h);
-                                            //e.setPeaks(h);
-                                        }
-                                        break;
+                                    case STRING:*/
+                                try {
+                                String p = cell.getStringCellValue();
+                                if (p.isEmpty() == false) {
+                                    //System.out.println(p);
+                                    //Picos h = new Picos();
+                                    getPeakIntensitytoFromString(p, e);
+                                    // System.out.println(h);
+                                    //e.setPeaks(h);
                                 }
+                            } catch (Exception a) {
+                                System.out.println("\n" + a.getMessage());
+                            }
+                            break;
+                            // }
 
-                                break;
-
+                            //break;
                             default:
                         }
                         k++;
