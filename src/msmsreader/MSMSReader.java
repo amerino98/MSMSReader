@@ -29,10 +29,13 @@ public class MSMSReader {
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public static void getFichero() throws ClassNotFoundException, IOException, FileNotFoundException {
+    public static ArrayList<Elemento> getFichero() throws ClassNotFoundException, IOException, FileNotFoundException {
         String myPath = System.getProperty("user.dir");
-        // Hacer un for para listar todos los elementos de la carpeta resources
+        String j, especie, organo;
+        int id;
+        int i = 1;
 
+        // Hacer un for para listar todos los elementos de la carpeta resources
         // Utilizar patrones regulares para obtener el organismo
         // y el organo
         // 1_Mouse_Adrenal gland_1
@@ -41,17 +44,23 @@ public class MSMSReader {
         // Split by _
         File myDirectory = new File(myPath);
         String[] files = myDirectory.list();
+        ArrayList<Elemento> prueba2 = new ArrayList<Elemento>();
+        ArrayList<Elemento> result2 = new ArrayList<Elemento>();
         for (String file : files) {
-            //System.out.println(file);
-            int z = file.indexOf(".xml");
+            int z = file.indexOf(".xlsx");
             if (z != -1) {
-
+                System.out.println(i);
+                prueba2 = getLectura(file);
+                result2.addAll(prueba2);
+                i++;
             }
+
         }
+        return result2;
     }
 
-    public static void getLectura() throws ClassNotFoundException, IOException, FileNotFoundException {
-
+    public static ArrayList<Elemento> getLectura(String d) throws ClassNotFoundException, IOException, FileNotFoundException {
+        System.out.println(d);
         String myPath = System.getProperty("user.dir");
         // Hacer un for para listar todos los elementos de la carpeta resources
 
@@ -61,10 +70,10 @@ public class MSMSReader {
         // organismo: Mouse
         // órgano: Adrenal gland
         // Split by _
-        File myDirectory = new File(myPath);
-        String[] files = myDirectory.list();
-
-        File myFile = new File(myPath, "1_Mouse_Adrenal gland_1.xlsx");
+        //  File myDirectory = new File(myPath);
+        // String[] files = myDirectory.list();
+        //String d = "1_Mouse_Adrenal gland_1.xlsx";
+        File myFile = new File(myPath, d);
 
         FileInputStream fis = new FileInputStream(myFile);
         // Return first sheet
@@ -79,23 +88,38 @@ public class MSMSReader {
             int k;
             int rowNumb = 0;
             int x;
-            Elemento arrayObjetos[] = new Elemento[5000];
+            ArrayList<Elemento> prueba = new ArrayList<Elemento>();
 
+            int a = d.indexOf("_");
+            String j = d.substring(0, a);
+            int id = Integer.parseInt(j);
+
+            //System.out.println(id);
+            d = d.substring(a + 1, d.length());
+            // System.out.println(d);
+            a = d.indexOf("_");
+            j = d.substring(0, a);
+            String especie = j;
+
+            //System.out.println(especie);
+            d = d.substring(a + 1, d.length());
+            //System.out.println(d);
+            a = d.indexOf("_");
+            j = d.substring(0, a);
+            String organo = j;
+
+            //System.out.println(organo);
             while (rowIterator.hasNext()) {
                 Elemento e = new Elemento();
-
+                e.setOrgano(organo);
+                e.setEspecie(especie);
+                e.setId(id);
                 Row row = rowIterator.next();
                 // For each row, iterate through each columns
                 Iterator<Cell> cellIterator = row.cellIterator();
-                if (rowNumb >= 10 && rowNumb <= mySheet.getLastRowNum()) {
-                    /*if (rowNumb == 639 || rowNumb == 638) {
-                        System.out.println("ROW NUM: " + rowNumb);
-                        System.out.println("Row size: " + row.getCell(30));
-                    }*/
- /* while (cellIterator.hasNext()) {
-                        //System.out.print(k + "\t");
 
-                        Cell cell = cellIterator.next();*/
+                if (rowNumb >= 10 && rowNumb <= mySheet.getLastRowNum()) {
+
                     for (k = 0; k <= row.getLastCellNum(); k++) {
                         Cell cell = row.getCell(k);
                         try {
@@ -122,11 +146,19 @@ public class MSMSReader {
                                         try {
                                             w = w.substring(w.length() - 1, w.length());
                                             e.setIonMode(w);
-                                        } catch (Exception a) {
-                                            System.out.println("\n aduct " + a.getMessage());
+                                        } catch (Exception p) {
+                                            System.out.println("\n aduct " + p.getMessage());
                                             System.out.println("row " + rowNumb);
                                             System.out.println("column: " + k);
                                         }
+                                    }
+                                    break;
+                                case 9:
+                                    Double g;
+                                    g = cell.getNumericCellValue();
+                                    // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                    if (g != null) {
+                                        e.setPrecursorMz(cell.getNumericCellValue());
                                     }
                                     break;
                                 case 10:
@@ -168,8 +200,8 @@ public class MSMSReader {
                                                 //e.setPeaks(h);
                                             }
 
-                                        } catch (Exception a) {
-                                            System.out.println("\n" + a.getMessage());
+                                        } catch (Exception r) {
+                                            System.out.println("\n" + r.getMessage());
                                             System.out.println(e);
                                             System.out.println("CELL: " + cell.toString());
                                             System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
@@ -181,26 +213,37 @@ public class MSMSReader {
 
                                 default:
                             }
-                        } catch (Exception a) {
-                            System.out.println("\n" + a.getMessage());
+                        } catch (Exception r) {
+                            System.out.println("\n" + r.getMessage());
                         }
                         //k++;
                     }
                     try {
-                        System.out.println("\n");
-                        System.out.println(e);
-                        arrayObjetos[i] = e;
-                    } catch (Exception a) {
-                        System.out.println("\n" + a.getMessage());
+                        //System.out.println("\n");
+                        // System.out.println(e);
+
+                        prueba.add(e);
+                    } catch (Exception h) {
+                        System.out.println("\n" + h.getMessage());
                     }
                     // k = 0;
-                    System.out.println(i + 1);
-                    System.out.println(mySheet.getLastRowNum() - 9);
+                    // System.out.println(i + 1);
+                    // System.out.println(mySheet.getLastRowNum() - 9);
                     i++;
                 }
                 rowNumb++;
 
             }
+
+            for (i = 0; i < prueba.size(); i++) {
+                System.out.println("\n");
+                System.out.print(prueba.get(i));
+                System.out.println("\n");
+                System.out.print(i + 1);
+                System.out.println("\t de ");
+                System.out.println(mySheet.getLastRowNum() - 9);
+            }
+            return prueba;
         }
 
     }
@@ -258,10 +301,17 @@ public class MSMSReader {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, FileNotFoundException {
-        getLectura();
-        /*
-		 * Elemento[] a= getLectura(); int i; for (i=0;i<=a.length;i++) {
-		 * System.out.println(a[i]); }
-         */
+        // getLectura();
+        int i;
+
+        ArrayList<Elemento> todos2 = new ArrayList<Elemento>();
+        todos2 = getFichero();
+        /*for (i = 0; i < todos2.size(); i++) {
+            System.out.println("\n");
+            System.out.print(todos2.get(i));
+            System.out.println("\n");
+            System.out.print(i);
+        }*/
+
     }
 }

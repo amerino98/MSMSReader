@@ -5,6 +5,10 @@ import java.io.Serializable;
 public class Elemento implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    public Integer id;
+    public String especie;
+    public String organo;
+
     public String name;
     public Double precursorMz;
     public String adduct;
@@ -23,7 +27,31 @@ public class Elemento implements Serializable {
 
     @Override
     public String toString() {
-        return "Elemento{" + "name=" + name + ", precursorMz=" + precursorMz + ", adduct=" + adduct + ", smiles=" + smiles + ", inchikey=" + inchikey + ", ontology=" + ontology + ", formula=" + formula + ", retentiontime=" + retentiontime + ", ionMode=" + ionMode + ", numPeaks=" + numPeaks + ", peaks=" + peaks + '}';
+        return "Elemento{" + "id=" + id + ", especie=" + especie + ", organo=" + organo + ", name=" + name + ", precursorMz=" + precursorMz + ", adduct=" + adduct + ", smiles=" + smiles + ", inchikey=" + inchikey + ", ontology=" + ontology + ", formula=" + formula + ", retentiontime=" + retentiontime + ", ionMode=" + ionMode + ", numPeaks=" + numPeaks + ", peaks=" + peaks + '}';
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getEspecie() {
+        return especie;
+    }
+
+    public void setEspecie(String especie) {
+        this.especie = especie;
+    }
+
+    public String getOrgano() {
+        return organo;
+    }
+
+    public void setOrgano(String organo) {
+        this.organo = organo;
     }
 
     public String getName() {
