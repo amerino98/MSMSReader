@@ -34,14 +34,6 @@ public class MSMSReader {
         String j, especie, organo;
         int id;
         int i = 1;
-
-        // Hacer un for para listar todos los elementos de la carpeta resources
-        // Utilizar patrones regulares para obtener el organismo
-        // y el organo
-        // 1_Mouse_Adrenal gland_1
-        // organismo: Mouse
-        // órgano: Adrenal gland
-        // Split by _
         File myDirectory = new File(myPath);
         String[] files = myDirectory.list();
         ArrayList<Elemento> prueba2 = new ArrayList<Elemento>();
@@ -55,7 +47,6 @@ public class MSMSReader {
                 result2.addAll(prueba2);
                 i++;
             }
-
         }
         return result2;
     }
@@ -63,16 +54,6 @@ public class MSMSReader {
     public static ArrayList<Elemento> getLectura(String d) throws ClassNotFoundException, IOException, FileNotFoundException {
         System.out.println(d);
         String myPath = System.getProperty("user.dir");
-        // Hacer un for para listar todos los elementos de la carpeta resources
-        // Utilizar patrones regulares para obtener el organismo
-        // y el organo
-        // 1_Mouse_Adrenal gland_1
-        // organismo: Mouse
-        // órgano: Adrenal gland
-        // Split by _
-        //  File myDirectory = new File(myPath);
-        // String[] files = myDirectory.list();
-        //String d = "1_Mouse_Adrenal gland_1.xlsx";
         File myFile = new File(myPath, d);
         FileInputStream fis = new FileInputStream(myFile);
         // Return first sheet
@@ -116,7 +97,6 @@ public class MSMSReader {
                 Row row = rowIterator.next();
                 // For each row, iterate through each columns
                 Iterator<Cell> cellIterator = row.cellIterator();
-
                 if (rowNumb >= 10 && rowNumb <= mySheet.getLastRowNum()) {
                     if (row.getLastCellNum() != 93 && row.getLastCellNum() != 50) {
                         for (k = 0; k <= row.getLastCellNum(); k++) {
@@ -201,7 +181,7 @@ public class MSMSReader {
 
                                             } catch (Exception r) {
                                                 System.out.println("\n" + r.getMessage());
-                                                System.out.println(e);
+                                                System.out.println(r);
                                                 System.out.println("CELL: " + cell.toString());
                                                 System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
                                                 System.out.println("row " + rowNumb);
@@ -301,7 +281,7 @@ public class MSMSReader {
 
                                             } catch (Exception r) {
                                                 System.out.println("\n" + r.getMessage());
-                                                System.out.println(e);
+                                                System.out.println(r);
                                                 System.out.println("CELL: " + cell.toString());
                                                 System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
                                                 System.out.println("row " + rowNumb);
@@ -401,7 +381,7 @@ public class MSMSReader {
 
                                             } catch (Exception r) {
                                                 System.out.println("\n" + r.getMessage());
-                                                System.out.println(e);
+                                                System.out.println(r);
                                                 System.out.println("CELL: " + cell.toString());
                                                 System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
                                                 System.out.println("row " + rowNumb);
@@ -502,17 +482,14 @@ public class MSMSReader {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, FileNotFoundException {
-        // getLectura();
         int i;
-
         ArrayList<Elemento> todos2 = new ArrayList<Elemento>();
         todos2 = getFichero();
-        for (i = 0; i < todos2.size(); i++) {
+        /* for (i = 0; i < todos2.size(); i++) {
             System.out.println("\n");
             System.out.print(todos2.get(i));
             System.out.println("\n");
             System.out.print(i);
-        }
-
+        }*/
     }
 }
