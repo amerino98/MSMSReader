@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -56,6 +58,9 @@ public class MSMSReader {
         String myPath = System.getProperty("user.dir");
         File myFile = new File(myPath, d);
         FileInputStream fis = new FileInputStream(myFile);
+        Logger logger = Logger.getLogger(MSMSReader.class);
+        BasicConfigurator.configure();
+
         // Return first sheet
         // from the XLSX workbook
         try ( // Finds the workbook instance for XLSX file
@@ -102,98 +107,215 @@ public class MSMSReader {
                         for (k = 0; k <= row.getLastCellNum(); k++) {
                             Cell cell = row.getCell(k);
                             try {
+
                                 switch (k) {
                                     case 1:
-                                        Double f;
-                                        f = cell.getNumericCellValue();
-                                        //System.out.print("AVERAGE RETENTION TIME:" + cell.getStringCellValue() + "\t");
-                                        if (f != null) {
-                                            e.setRetentiontime(cell.getNumericCellValue());
+                                        try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double f;
+
+                                                f = cell.getNumericCellValue();
+                                                // System.out.print("rt: " + cell.getStringCellValue() + "\t");
+                                                if (f != null) {
+                                                    e.setRetentiontime(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setRetentiontime(Double.parseDouble(s));
+                                                    }
+
+                                                }
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 3:
                                         //System.out.print("NAME:" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setName(cell.getStringCellValue());
-                                        }
-                                        break;
+                                       try {
+                                        String h = cell.getStringCellValue();
+
+                                        e.setName(h);
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 4:
                                         // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setAdduct(cell.getStringCellValue());
-                                            String w = cell.getStringCellValue();
-                                            try {
-                                                w = w.substring(w.length() - 1, w.length());
-                                                e.setIonMode(w);
-                                            } catch (Exception p) {
-                                                System.out.println("\n aduct " + p.getMessage());
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
+                                        try {
+                                        String v = cell.getStringCellValue();
+
+                                        e.setAdduct(v);
+                                        String w = v;
+                                        try {
+                                            w = w.substring(w.length() - 1, w.length());
+                                            e.setIonMode(w);
+                                        } catch (Exception p) {
+                                            /* System.out.println("\n aduct " + p.getMessage());
+                                            System.out.println("row " + rowNumb);
+                                            System.out.println("column: " + k);*/
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 9:
-                                        Double g;
-                                        g = cell.getNumericCellValue();
-                                        // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
-                                        if (g != null) {
-                                            e.setPrecursorMz(cell.getNumericCellValue());
+                                        try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double g;
+
+                                                g = cell.getNumericCellValue();
+                                                // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                                if (g != null) {
+                                                    e.setPrecursorMz(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setPrecursorMz(Double.parseDouble(s));
+                                                    }
+
+                                                }
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 10:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setFormula(cell.getStringCellValue());
+try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setFormula(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 11:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setOntology(cell.getStringCellValue());
+try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setOntology(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 13:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setSmiles(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setSmiles(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin smiles");
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
 
                                     case 12:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setInchikey(cell.getStringCellValue());
+try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setInchikey(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin Inchikey");
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 30:
                                         //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            try {
 
-                                                String p = cell.getStringCellValue();
-                                                if (p.isEmpty() == false) {
-                                                    //System.out.println(p);
-                                                    //Picos h = new Picos();
-                                                    getPeakIntensitytoFromString(p, e);
-                                                    // System.out.println(h);
-                                                    //e.setPeaks(h);
-                                                }
 
-                                            } catch (Exception r) {
-                                                System.out.println("\n" + r.getMessage());
-                                                System.out.println(r);
-                                                System.out.println("CELL: " + cell.toString());
-                                                System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
-                                            break;
+                                        try {
+                                        String q = cell.getStringCellValue();
+                                        String p = q;
+                                        if (p.isEmpty() == false) {
+                                            //System.out.println(p);
+                                            //Picos h = new Picos();
+                                            getPeakIntensitytoFromString(p, e);
+                                            // System.out.println(h);
+                                            //e.setPeaks(h);
+                                        } else {
+                                            logger.info("Sin picos");
+                                            e.setNumPeaks(0);
                                         }
+
+                                    } catch (Exception r) {
+                                        logger.info("Sin picos");
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("CELL: " + cell.toString());
+                                        System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
 
                                     default:
                                 }
                             } catch (Exception r) {
-                                System.out.println("\n" + r.getMessage());
+                                /* System.out.println("\n" + r.getMessage());
+                                System.out.println(r);
+                                System.out.println("row " + rowNumb);
+                                System.out.println("column: " + k);*/
                             }
                             //k++;
                         }
@@ -204,96 +326,216 @@ public class MSMSReader {
                             try {
                                 switch (k) {
                                     case 1:
-                                        Double f;
-                                        f = cell.getNumericCellValue();
-                                        //System.out.print("AVERAGE RETENTION TIME:" + cell.getStringCellValue() + "\t");
-                                        if (f != null) {
-                                            e.setRetentiontime(cell.getNumericCellValue());
+                                       try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double f;
+
+                                                f = cell.getNumericCellValue();
+                                                // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                                if (f != null) {
+                                                    e.setRetentiontime(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setRetentiontime(Double.parseDouble(s));
+                                                    }
+
+                                                }
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 5:
                                         //System.out.print("NAME:" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setName(cell.getStringCellValue());
-                                        }
-                                        break;
+                                        try {
+                                        String h = cell.getStringCellValue();
+
+                                        e.setName(h);
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("CELL: " + cell.toString());
+                                        System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 6:
                                         // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setAdduct(cell.getStringCellValue());
-                                            String w = cell.getStringCellValue();
-                                            try {
-                                                w = w.substring(w.length() - 1, w.length());
-                                                e.setIonMode(w);
-                                            } catch (Exception p) {
-                                                System.out.println("\n aduct " + p.getMessage());
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
+                                       try {
+                                        String v = cell.getStringCellValue();
+
+                                        e.setAdduct(v);
+                                        String w = v;
+                                        try {
+                                            w = w.substring(w.length() - 1, w.length());
+                                            e.setIonMode(w);
+                                        } catch (Exception p) {
+                                            /* System.out.println("\n aduct " + p.getMessage());
+                                            System.out.println("row " + rowNumb);
+                                            System.out.println("column: " + k);*/
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 12:
-                                        Double g;
-                                        g = cell.getNumericCellValue();
-                                        // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
-                                        if (g != null) {
-                                            e.setPrecursorMz(cell.getNumericCellValue());
+                                       try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double g;
+
+                                                g = cell.getNumericCellValue();
+                                                // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                                if (g != null) {
+                                                    e.setPrecursorMz(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setPrecursorMz(Double.parseDouble(s));
+                                                    }
+
+                                                }
+
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*  System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 13:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setFormula(cell.getStringCellValue());
+                                       try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setFormula(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 14:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setOntology(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setOntology(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 16:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setSmiles(cell.getStringCellValue());
+                                       try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setSmiles(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin smiles");
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
 
                                     case 15:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setInchikey(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setInchikey(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin Inchikey");
+                                        /*  System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
                                     case 35:
                                         //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            try {
 
-                                                String p = cell.getStringCellValue();
-                                                if (p.isEmpty() == false) {
-                                                    //System.out.println(p);
-                                                    //Picos h = new Picos();
-                                                    getPeakIntensitytoFromString(p, e);
-                                                    // System.out.println(h);
-                                                    //e.setPeaks(h);
-                                                }
 
-                                            } catch (Exception r) {
-                                                System.out.println("\n" + r.getMessage());
-                                                System.out.println(r);
-                                                System.out.println("CELL: " + cell.toString());
-                                                System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
-                                            break;
+                                        try {
+                                        String q = cell.getStringCellValue();
+                                        String p = q;
+                                        if (p.isEmpty() == false) {
+                                            //System.out.println(p);
+                                            //Picos h = new Picos();
+                                            getPeakIntensitytoFromString(p, e);
+                                            // System.out.println(h);
+                                            //e.setPeaks(h);
+                                        } else {
+                                            e.setNumPeaks(0);
+                                            logger.info("Sin picos");
                                         }
+
+                                    } catch (Exception r) {
+                                        logger.info("Sin picos");
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("CELL: " + cell.toString());
+                                        System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
 
                                     default:
                                 }
                             } catch (Exception r) {
-                                System.out.println("\n" + r.getMessage());
+                                /*  System.out.println("\n" + r.getMessage());
+                                System.out.println(r);
+                                System.out.println("row " + rowNumb);
+                                System.out.println("column: " + k);*/
                             }
                             //k++;
                         }
@@ -302,98 +544,219 @@ public class MSMSReader {
                         for (k = 0; k <= row.getLastCellNum(); k++) {
                             Cell cell = row.getCell(k);
                             try {
+
                                 switch (k) {
                                     case 2:
-                                        Double f;
-                                        f = cell.getNumericCellValue();
-                                        //System.out.print("AVERAGE RETENTION TIME:" + cell.getStringCellValue() + "\t");
-                                        if (f != null) {
-                                            e.setRetentiontime(cell.getNumericCellValue());
+                                       try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double f;
+
+                                                f = cell.getNumericCellValue();
+                                                // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                                if (f != null) {
+                                                    e.setRetentiontime(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setRetentiontime(Double.parseDouble(s));
+                                                    }
+
+                                                }
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 6:
                                         //System.out.print("NAME:" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setName(cell.getStringCellValue());
-                                        }
-                                        break;
+                                      try {
+                                        String h = cell.getStringCellValue();
+
+                                        e.setName(h);
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 7:
                                         // System.out.print("ADDUCT" + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setAdduct(cell.getStringCellValue());
-                                            String w = cell.getStringCellValue();
-                                            try {
-                                                w = w.substring(w.length() - 1, w.length());
-                                                e.setIonMode(w);
-                                            } catch (Exception p) {
-                                                System.out.println("\n aduct " + p.getMessage());
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
+                                        try {
+                                        String v = cell.getStringCellValue();
+
+                                        e.setAdduct(v);
+                                        String w = v;
+                                        try {
+                                            w = w.substring(w.length() - 1, w.length());
+                                            e.setIonMode(w);
+                                        } catch (Exception p) {
+                                            /*System.out.println("\n aduct " + p.getMessage());
+                                            System.out.println("row " + rowNumb);
+                                            System.out.println("column: " + k);*/
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
                                     case 13:
-                                        Double g;
-                                        g = cell.getNumericCellValue();
-                                        // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
-                                        if (g != null) {
-                                            e.setPrecursorMz(cell.getNumericCellValue());
+                                       try {
+                                        switch (cell.getCellTypeEnum()) {
+                                            case NUMERIC:
+                                                Double g;
+
+                                                g = cell.getNumericCellValue();
+                                                // System.out.print("precursormz: " + cell.getStringCellValue() + "\t");
+                                                if (g != null) {
+                                                    e.setPrecursorMz(cell.getNumericCellValue());
+                                                }
+
+                                                break;
+                                            case STRING:
+                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                    String s = cell.getStringCellValue();
+                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                        e.setPrecursorMz(Double.parseDouble(s));
+                                                    }
+
+                                                }
+                                                break;
+                                            default:
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
                                     case 14:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setFormula(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setFormula(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /*   System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
                                     case 15:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setOntology(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setOntology(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
                                     case 17:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setSmiles(cell.getStringCellValue());
+try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setSmiles(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin smiles");
+                                        /*  System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
 
                                     case 16:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            e.setInchikey(cell.getStringCellValue());
+                                        try {
+                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                            String s = cell.getStringCellValue();
+                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                e.setInchikey(s);
+                                            }
+
                                         }
-                                        break;
+                                    } catch (Exception r) {
+                                        logger.info("Sin Inchikey");
+                                        /*System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+
+                                    break;
                                     case 36:
                                         //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
-                                        if (cell.getStringCellValue() != null) {
-                                            try {
 
-                                                String p = cell.getStringCellValue();
-                                                if (p.isEmpty() == false) {
-                                                    //System.out.println(p);
-                                                    //Picos h = new Picos();
-                                                    getPeakIntensitytoFromString(p, e);
-                                                    // System.out.println(h);
-                                                    //e.setPeaks(h);
-                                                }
 
-                                            } catch (Exception r) {
-                                                System.out.println("\n" + r.getMessage());
-                                                System.out.println(r);
-                                                System.out.println("CELL: " + cell.toString());
-                                                System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
-                                                System.out.println("row " + rowNumb);
-                                                System.out.println("column: " + k);
-                                            }
-                                            break;
+                                        try {
+                                        String q = cell.getStringCellValue();
+                                        String p = q;
+                                        if (p.isEmpty() == false) {
+                                            //System.out.println(p);
+                                            //Picos h = new Picos();
+                                            getPeakIntensitytoFromString(p, e);
+                                            // System.out.println(h);
+                                            //e.setPeaks(h);
+                                        } else {
+                                            e.setNumPeaks(0);
+                                            logger.info("Sin picos");
                                         }
+
+                                    } catch (Exception r) {
+                                        logger.info("Sin picos");
+                                        /* System.out.println("\n" + r.getMessage());
+                                        System.out.println(r);
+                                        System.out.println("CELL: " + cell.toString());
+                                        System.out.print("MZ/SPECTRUM: " + cell.getNumericCellValue() + "\t");
+                                        System.out.println("row " + rowNumb);
+                                        System.out.println("column: " + k);*/
+                                    }
+                                    break;
 
                                     default:
                                 }
                             } catch (Exception r) {
-                                System.out.println("\n" + r.getMessage());
+                                /* System.out.println("\n" + r.getMessage());
+                                System.out.println(r);
+                                System.out.println("row " + rowNumb);
+                                System.out.println("column: " + k);*/
                             }
                             //k++;
                         }
@@ -405,7 +768,7 @@ public class MSMSReader {
 
                         prueba.add(e);
                     } catch (Exception h) {
-                        System.out.println("\n" + h.getMessage());
+                        //System.out.println("\n" + h.getMessage());
                     }
                     // k = 0;
                     // System.out.println(i + 1);
@@ -485,7 +848,7 @@ public class MSMSReader {
         int i;
         ArrayList<Elemento> todos2 = new ArrayList<Elemento>();
         todos2 = getFichero();
-        /* for (i = 0; i < todos2.size(); i++) {
+        /*for (i = 0; i < todos2.size(); i++) {
             System.out.println("\n");
             System.out.print(todos2.get(i));
             System.out.println("\n");
