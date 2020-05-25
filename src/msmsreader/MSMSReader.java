@@ -12,8 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -58,13 +60,47 @@ public class MSMSReader {
         String myPath = System.getProperty("user.dir");
         File myFile = new File(myPath, d);
         FileInputStream fis = new FileInputStream(myFile);
-        Logger logger = Logger.getLogger(MSMSReader.class);
         BasicConfigurator.configure();
+        Logger logger = Logger.getLogger("MyLog");
+        Logger logger2 = Logger.getLogger("MyLog2");
+        FileHandler fh;
+        FileHandler fh2;
+        int a = d.indexOf("_");
+        String j = d.substring(0, a);
+        int id = Integer.parseInt(j);
 
-        // Return first sheet
-        // from the XLSX workbook
-        try ( // Finds the workbook instance for XLSX file
-                 XSSFWorkbook myWorkBook = new XSSFWorkbook(fis)) {
+        //System.out.println(id);
+        d = d.substring(a + 1, d.length());
+        // System.out.println(d);
+        a = d.indexOf("_");
+        j = d.substring(0, a);
+        String especie = j;
+
+        //System.out.println(especie);
+        d = d.substring(a + 1, d.length());
+        //System.out.println(d);
+        a = d.indexOf("_");
+        j = d.substring(0, a);
+        String organo = j;
+        try {
+            String archivo = "/" + id + especie + organo + "_no_structures.log";
+            String archivo2 = "/" + id + especie + organo + "_no_msms.log";
+            // This block configure the logger with handler and formatter
+            fh = new FileHandler(myPath + "/log/" + archivo);
+            fh2 = new FileHandler(myPath + "/log/" + archivo2);
+            logger.addHandler(fh);
+            logger2.addHandler(fh2);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+            fh2.setFormatter(formatter);
+
+            // the following statement is used to log any messages
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try ( XSSFWorkbook myWorkBook = new XSSFWorkbook(fis)) {
             // Return first sheet
             // from the XLSX workbook
             XSSFSheet mySheet = myWorkBook.getSheetAt(0);
@@ -74,24 +110,6 @@ public class MSMSReader {
             int rowNumb = 0;
             int x;
             ArrayList<Elemento> prueba = new ArrayList<Elemento>();
-
-            int a = d.indexOf("_");
-            String j = d.substring(0, a);
-            int id = Integer.parseInt(j);
-
-            //System.out.println(id);
-            d = d.substring(a + 1, d.length());
-            // System.out.println(d);
-            a = d.indexOf("_");
-            j = d.substring(0, a);
-            String especie = j;
-
-            //System.out.println(especie);
-            d = d.substring(a + 1, d.length());
-            //System.out.println(d);
-            a = d.indexOf("_");
-            j = d.substring(0, a);
-            String organo = j;
 
             //System.out.println(organo);
             while (rowIterator.hasNext()) {
@@ -123,7 +141,7 @@ public class MSMSReader {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
                                                     if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
                                                         e.setRetentiontime(Double.parseDouble(s));
@@ -190,9 +208,9 @@ public class MSMSReader {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
-                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                    if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                         e.setPrecursorMz(Double.parseDouble(s));
                                                     }
 
@@ -212,7 +230,7 @@ public class MSMSReader {
                                     case 10:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
 try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
                                             if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
                                                 e.setFormula(s);
@@ -229,7 +247,7 @@ try {
                                     case 11:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
 try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
                                             if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
                                                 e.setOntology(s);
@@ -246,15 +264,23 @@ try {
                                     case 13:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setSmiles(s);
+                                            } else {
+                                                e.smiles = null;
+                                                logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
                                             }
 
+                                        } else {
+                                            e.smiles = null;
+                                            logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin smiles");
+                                        e.smiles = null;
+                                        logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
+
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -265,15 +291,15 @@ try {
                                     case 12:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
 try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setInchikey(s);
                                             }
 
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin Inchikey");
+                                        // logger.info("Sin Inchikey");
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -287,19 +313,20 @@ try {
                                         try {
                                         String q = cell.getStringCellValue();
                                         String p = q;
-                                        if (p.isEmpty() == false) {
+                                        if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
                                             //System.out.println(p);
                                             //Picos h = new Picos();
                                             getPeakIntensitytoFromString(p, e);
                                             // System.out.println(h);
                                             //e.setPeaks(h);
                                         } else {
-                                            logger.info("Sin picos");
+                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                             e.setNumPeaks(0);
                                         }
 
                                     } catch (Exception r) {
-                                        logger.info("Sin picos");
+                                        e.setNumPeaks(0);
+                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -339,9 +366,9 @@ try {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
-                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                    if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                         e.setRetentiontime(Double.parseDouble(s));
                                                     }
 
@@ -408,9 +435,9 @@ try {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
-                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                    if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                         e.setPrecursorMz(Double.parseDouble(s));
                                                     }
 
@@ -430,9 +457,9 @@ try {
                                     case 13:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
                                        try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setFormula(s);
                                             }
 
@@ -447,9 +474,9 @@ try {
                                     case 14:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setOntology(s);
                                             }
 
@@ -464,15 +491,22 @@ try {
                                     case 16:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
                                        try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setSmiles(s);
+                                            } else {
+                                                logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
+                                                e.smiles = null;
                                             }
 
+                                        } else {
+                                            e.smiles = null;
+                                            logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin smiles");
+                                        e.smiles = null;
+                                        logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
                                         /*System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -484,15 +518,15 @@ try {
                                     case 15:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setInchikey(s);
                                             }
 
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin Inchikey");
+                                        // logger.info("Sin Inchikey");
                                         /*  System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -507,7 +541,7 @@ try {
                                         try {
                                         String q = cell.getStringCellValue();
                                         String p = q;
-                                        if (p.isEmpty() == false) {
+                                        if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
                                             //System.out.println(p);
                                             //Picos h = new Picos();
                                             getPeakIntensitytoFromString(p, e);
@@ -515,11 +549,12 @@ try {
                                             //e.setPeaks(h);
                                         } else {
                                             e.setNumPeaks(0);
-                                            logger.info("Sin picos");
+                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                         }
 
                                     } catch (Exception r) {
-                                        logger.info("Sin picos");
+                                        e.setNumPeaks(0);
+                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -560,9 +595,9 @@ try {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
-                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                    if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                         e.setRetentiontime(Double.parseDouble(s));
                                                     }
 
@@ -628,9 +663,9 @@ try {
 
                                                 break;
                                             case STRING:
-                                                if (cell.getRichStringCellValue().equals("null") == false) {
+                                                if (cell.getStringCellValue().equals("null") == false) {
                                                     String s = cell.getStringCellValue();
-                                                    if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                                    if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                         e.setPrecursorMz(Double.parseDouble(s));
                                                     }
 
@@ -649,9 +684,9 @@ try {
                                     case 14:
                                         // System.out.print("FORMULA: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setFormula(s);
                                             }
 
@@ -667,9 +702,9 @@ try {
                                     case 15:
                                         //System.out.print("ONTOLOGY: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setOntology(s);
                                             }
 
@@ -685,15 +720,22 @@ try {
                                     case 17:
                                         // System.out.print("SMILES: " + cell.getStringCellValue() + "\t");
 try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setSmiles(s);
+                                            } else {
+                                                logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
+                                                e.smiles = null;
                                             }
 
+                                        } else {
+                                            logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
+                                            e.smiles = null;
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin smiles");
+                                        e.smiles = null;
+                                        logger.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME:" + e.getName());
                                         /*  System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -705,15 +747,15 @@ try {
                                     case 16:
                                         //System.out.print("INCHIKEY: " + cell.getStringCellValue() + "\t");
                                         try {
-                                        if (cell.getRichStringCellValue().equals("null") == false) {
+                                        if (cell.getStringCellValue().equals("null") == false) {
                                             String s = cell.getStringCellValue();
-                                            if (s.isEmpty() == false || s.isBlank() == false || s.equals("null") == false) {
+                                            if (s.isEmpty() == false | s.isBlank() == false | s.equals("null") == false) {
                                                 e.setInchikey(s);
                                             }
 
                                         }
                                     } catch (Exception r) {
-                                        logger.info("Sin Inchikey");
+                                        // logger.info("Sin Inchikey");
                                         /*System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -728,7 +770,7 @@ try {
                                         try {
                                         String q = cell.getStringCellValue();
                                         String p = q;
-                                        if (p.isEmpty() == false) {
+                                        if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
                                             //System.out.println(p);
                                             //Picos h = new Picos();
                                             getPeakIntensitytoFromString(p, e);
@@ -736,11 +778,12 @@ try {
                                             //e.setPeaks(h);
                                         } else {
                                             e.setNumPeaks(0);
-                                            logger.info("Sin picos");
+                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                         }
 
                                     } catch (Exception r) {
-                                        logger.info("Sin picos");
+                                        e.setNumPeaks(0);
+                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -765,8 +808,9 @@ try {
                     try {
                         //System.out.println("\n");
                         // System.out.println(e);
-
-                        prueba.add(e);
+                        if (e.smiles != null | e.numPeaks == 0) {
+                            prueba.add(e);
+                        }
                     } catch (Exception h) {
                         //System.out.println("\n" + h.getMessage());
                     }
