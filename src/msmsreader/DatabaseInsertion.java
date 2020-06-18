@@ -26,7 +26,7 @@ public class DatabaseInsertion {
         try {
             // Open database connection
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-            this.c = DriverManager.getConnection("jdbc:mysql://localhost/msms?useSSL=true&serverTimezone=UTC", "root", "131427amm");// this connects to
+            this.c = DriverManager.getConnection("jdbc:mysql://localhost/MS_MS?useSSL=true&serverTimezone=UTC", "root", "131427amm");// this connects to
             // the
             // database
 

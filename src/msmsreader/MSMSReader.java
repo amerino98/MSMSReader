@@ -146,7 +146,6 @@ public class MSMSReader {
             int rowNumb = 0;
             int x;
             ArrayList<Compound> prueba = new ArrayList<Compound>();
-
             while (rowIterator.hasNext()) {
                 Compound e = new Compound();
                 e.setOrgan(organo);
@@ -333,7 +332,6 @@ try {
 
                                         }
                                     } catch (Exception r) {
-                                        // logger.info("Sin Inchikey");
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -342,17 +340,11 @@ try {
                                     break;
                                     case 30:
                                         //System.out.print("MZ/SPECTRUM: " + cell.getStringCellValue() + "\t");
-
-
                                         try {
                                         String q = cell.getStringCellValue();
                                         String p = q;
                                         if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
-                                            //System.out.println(p);
-                                            //Picos h = new Peak();
                                             getPeakIntensitytoFromString(p, e);
-                                            // System.out.println(h);
-                                            //e.setPeaks(h);
                                         } else {
                                             e.setNumPeaks(0);
                                         }
@@ -602,7 +594,7 @@ try {
                                 System.out.println("row " + rowNumb);
                                 System.out.println("column: " + k);*/
                             }
-                            //k++;
+
                         }
                     }
                     if (row.getLastCellNum() == 50) {
@@ -785,7 +777,7 @@ try {
 
                                         }
                                     } catch (Exception r) {
-                                        // logger.info("Sin Inchikey");
+
                                         /*System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("row " + rowNumb);
@@ -930,7 +922,7 @@ try {
         Date date = new Date();
         DateFormat hourdateFormat = new SimpleDateFormat("HH.mm.ss dd-MM-yyyy");
         String historial = hourdateFormat.format(date);
-        String namefile = historial + "_compound.log";
+        String namefile = historial + "_CompoundsInserted.log";
         String archivo = "/" + namefile;
         // This block configure the logger with handler and formatter
         fh = new FileHandler(directorio + archivo);
@@ -948,7 +940,6 @@ try {
             for (i = 0; i < todos2.size(); i++) {
                 int compound_id = sql.checkInchi(todos2.get(i));
                 if (compound_id == -1) {
-                    //logger.info("NAME: " + todos2.get(i).name + "   INCHIKEY: " + todos2.get(i).inchikey);
                     k++;
                 } else {
                     int insert = sql.InsertOrganCompound(todos2.get(i), compound_id);
