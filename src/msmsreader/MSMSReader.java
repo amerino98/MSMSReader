@@ -5,11 +5,16 @@
  */
 package msmsreader;
 
+//import com.mysql.jdbc.Statement;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -33,15 +38,64 @@ public class MSMSReader {
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public static ArrayList<Elemento> getFichero() throws ClassNotFoundException, IOException, FileNotFoundException {
+    public static OrganOrganism getOrganoOrganism() throws ClassNotFoundException, IOException, FileNotFoundException {
+        OrganOrganism o = new OrganOrganism();
         String myPath = System.getProperty("user.dir");
         String j, especie, organo;
         int id;
         int i = 1;
         File myDirectory = new File(myPath);
         String[] files = myDirectory.list();
-        ArrayList<Elemento> prueba2 = new ArrayList<Elemento>();
-        ArrayList<Elemento> result2 = new ArrayList<Elemento>();
+        String d;
+        ArrayList<String> prueba1 = new ArrayList<String>();
+        ArrayList<String> prueba2 = new ArrayList<String>();
+        ArrayList<Integer> prueba4 = new ArrayList<Integer>();
+        try {
+            for (String file : files) {
+                int z = file.indexOf(".xlsx");
+                if (z != -1) {
+                    d = file;
+                    int a = d.indexOf("_");
+                    j = d.substring(0, a);
+                    id = Integer.parseInt(j);
+                    d = d.substring(a + 1, d.length());
+                    // System.out.println(d);
+                    a = d.indexOf("_");
+                    j = d.substring(0, a);
+                    especie = j;
+                    d = d.substring(a + 1, d.length());
+                    a = d.indexOf(".");
+                    j = d.substring(0, a);
+                    organo = j;
+                    prueba1.add(organo);
+                    prueba2.add(especie);
+                    prueba4.add(id);
+                }
+
+            }
+
+            o.organ = prueba1;
+
+            o.id = prueba4;
+            o.organism = prueba2;
+
+        } catch (Exception r) {
+
+        }
+
+        return o;
+
+    }
+
+    public static ArrayList<Compound> getFichero() throws ClassNotFoundException, IOException, FileNotFoundException {
+
+        String myPath = System.getProperty("user.dir");
+
+        int i = 1;
+        File myDirectory = new File(myPath);
+        String[] files = myDirectory.list();
+        ArrayList<Compound> prueba2 = new ArrayList<Compound>();
+        ArrayList<Compound> result2 = new ArrayList<Compound>();
 
         for (String file : files) {
             int z = file.indexOf(".xlsx");
@@ -55,67 +109,48 @@ public class MSMSReader {
         return result2;
     }
 
-    public static ArrayList<Elemento> getLectura(String d) throws ClassNotFoundException, IOException, FileNotFoundException {
+    public static ArrayList<Compound> getLectura(String d) throws ClassNotFoundException, IOException, FileNotFoundException {
         System.out.println(d);
         String myPath = System.getProperty("user.dir");
         File myFile = new File(myPath, d);
         FileInputStream fis = new FileInputStream(myFile);
         BasicConfigurator.configure();
-        Logger logger = Logger.getLogger("MyLog");
-        Logger logger2 = Logger.getLogger("MyLog2");
-        FileHandler fh;
-        FileHandler fh2;
         int a = d.indexOf("_");
         String j = d.substring(0, a);
         int id = Integer.parseInt(j);
-
-        //System.out.println(id);
         d = d.substring(a + 1, d.length());
-        // System.out.println(d);
         a = d.indexOf("_");
         j = d.substring(0, a);
         String especie = j;
-
-        //System.out.println(especie);
         d = d.substring(a + 1, d.length());
-        //System.out.println(d);
-        a = d.indexOf("_");
+        a = d.indexOf(".xlsx");
         j = d.substring(0, a);
         String organo = j;
-        try {
+
+        try ( XSSFWorkbook myWorkBook = new XSSFWorkbook(fis)) {
+            File directorio = new File(myPath + "/" + id + especie + organo);
+            if (!directorio.exists()) {
+                directorio.mkdirs();
+            }
+            Logger logger = Logger.getLogger(id + especie + organo + "_no_structuresLog");
+            FileHandler fh;
             String archivo = "/" + id + especie + organo + "_no_structures.log";
-            String archivo2 = "/" + id + especie + organo + "_no_msms.log";
-            // This block configure the logger with handler and formatter
-            fh = new FileHandler(myPath + "/log/" + archivo);
-            fh2 = new FileHandler(myPath + "/log/" + archivo2);
+            fh = new FileHandler(directorio + archivo);
             logger.addHandler(fh);
-            logger2.addHandler(fh2);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
-            fh2.setFormatter(formatter);
-
-            // the following statement is used to log any messages
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try ( XSSFWorkbook myWorkBook = new XSSFWorkbook(fis)) {
-            // Return first sheet
-            // from the XLSX workbook
             XSSFSheet mySheet = myWorkBook.getSheetAt(0);
             Iterator<Row> rowIterator = mySheet.iterator();
             int i = 0;
             int k;
             int rowNumb = 0;
             int x;
-            ArrayList<Elemento> prueba = new ArrayList<Elemento>();
+            ArrayList<Compound> prueba = new ArrayList<Compound>();
 
-            //System.out.println(organo);
             while (rowIterator.hasNext()) {
-                Elemento e = new Elemento();
-                e.setOrgano(organo);
-                e.setEspecie(especie);
+                Compound e = new Compound();
+                e.setOrgan(organo);
+                e.setOrganism(especie);
                 e.setId(id);
                 Row row = rowIterator.next();
                 // For each row, iterate through each columns
@@ -138,7 +173,6 @@ public class MSMSReader {
                                                 if (f != null) {
                                                     e.setRetentiontime(cell.getNumericCellValue());
                                                 }
-
                                                 break;
                                             case STRING:
                                                 if (cell.getStringCellValue().equals("null") == false) {
@@ -315,18 +349,16 @@ try {
                                         String p = q;
                                         if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
                                             //System.out.println(p);
-                                            //Picos h = new Picos();
+                                            //Picos h = new Peak();
                                             getPeakIntensitytoFromString(p, e);
                                             // System.out.println(h);
                                             //e.setPeaks(h);
                                         } else {
-                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                             e.setNumPeaks(0);
                                         }
 
                                     } catch (Exception r) {
                                         e.setNumPeaks(0);
-                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -543,18 +575,16 @@ try {
                                         String p = q;
                                         if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
                                             //System.out.println(p);
-                                            //Picos h = new Picos();
+                                            //Picos h = new Peak();
                                             getPeakIntensitytoFromString(p, e);
                                             // System.out.println(h);
                                             //e.setPeaks(h);
                                         } else {
                                             e.setNumPeaks(0);
-                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                         }
 
                                     } catch (Exception r) {
                                         e.setNumPeaks(0);
-                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -771,19 +801,15 @@ try {
                                         String q = cell.getStringCellValue();
                                         String p = q;
                                         if (p.isEmpty() == false | p.equals("null") == false | p.isBlank() == false) {
-                                            //System.out.println(p);
-                                            //Picos h = new Picos();
+
                                             getPeakIntensitytoFromString(p, e);
-                                            // System.out.println(h);
-                                            //e.setPeaks(h);
+
                                         } else {
                                             e.setNumPeaks(0);
-                                            logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey());
                                         }
 
                                     } catch (Exception r) {
                                         e.setNumPeaks(0);
-                                        logger2.info("ROW:" + String.valueOf(rowNumb + 1) + ", NAME" + e.getName() + ", SMILES:" + e.getSmiles() + ", INCHIKEY:" + e.getInchikey() + " P:" + e.getPeaks());
                                         /* System.out.println("\n" + r.getMessage());
                                         System.out.println(r);
                                         System.out.println("CELL: " + cell.toString());
@@ -801,36 +827,25 @@ try {
                                 System.out.println("row " + rowNumb);
                                 System.out.println("column: " + k);*/
                             }
-                            //k++;
+
                         }
                     }
 
                     try {
+
                         //System.out.println("\n");
                         // System.out.println(e);
-                        if (e.smiles != null | e.numPeaks == 0) {
+                        if (e.smiles != null) {
                             prueba.add(e);
                         }
                     } catch (Exception h) {
                         //System.out.println("\n" + h.getMessage());
                     }
-                    // k = 0;
-                    // System.out.println(i + 1);
-                    // System.out.println(mySheet.getLastRowNum() - 9);
                     i++;
                 }
                 rowNumb++;
 
             }
-
-            /* for (i = 0; i < prueba.size(); i++) {
-                System.out.println("\n");
-                System.out.print(prueba.get(i));
-                System.out.println("\n");
-                System.out.print(i + 1);
-                System.out.println("\t de ");
-                System.out.println(mySheet.getLastRowNum() - 9);
-            }*/
             return prueba;
         }
 
@@ -841,11 +856,11 @@ try {
      * @param p
      * @param e
      */
-    public static void getPeakIntensitytoFromString(String p, Elemento e) {
-        // System.out.println("MZ/SPECTRUM: " + p + "\t");
+    public static void getPeakIntensitytoFromString(String p, Compound e) {
+
         List<Double> piks = new ArrayList();
         List<Integer> intensity = new ArrayList();
-        Picos d = new Picos();
+        Peak l = new Peak();
         int z = 0;
         int a = 0;
         int i = 0;
@@ -857,17 +872,17 @@ try {
                 if (a != -1) {
                     double pico = Double.parseDouble(p.substring(0, a));
                     i++;
-                    // System.out.println(pico);
+
                     piks.add(pico);
                     p = p.substring(a + 1, p.length());
-                    //System.out.println(p);
+
                     z = p.indexOf(" ");
                     if (z != -1) {
                         double intensidad = Double.parseDouble(p.substring(0, z));
-                        // System.out.println(intensidad);
+
                         intensity.add((int) intensidad);
                         p = p.substring(z + 1, p.length());
-                        //System.out.println(p);
+
                     } else {
                         double intensidad = Double.parseDouble(p);
                         intensity.add((int) intensidad);
@@ -875,28 +890,101 @@ try {
                 } else {
                     double intensidad = Double.parseDouble(p);
                     intensity.add((int) intensidad);
-                    //System.out.println(intensidad);
                 }
 
             }
         }
         e.setNumPeaks(i);
-        d.setMz(piks);
-        d.setIntensity(intensity);
-        // System.out.println(piks);
-        // System.out.println(intensity);
-        e.setPeaks(d);
+        l.setMz(piks);
+        l.setIntensity(intensity);
+        e.setPeaks(l);
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException, FileNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, FileNotFoundException, SQLException {
         int i;
-        ArrayList<Elemento> todos2 = new ArrayList<Elemento>();
+        ArrayList<Compound> todos2 = new ArrayList<Compound>();
+        OrganOrganism o = new OrganOrganism();
+        o = getOrganoOrganism();
         todos2 = getFichero();
-        /*for (i = 0; i < todos2.size(); i++) {
-            System.out.println("\n");
-            System.out.print(todos2.get(i));
-            System.out.println("\n");
-            System.out.print(i);
-        }*/
+        DatabaseInsertion sql = new DatabaseInsertion();
+        try {
+            sql.connect();
+            sql.createOrganism();
+            sql.createOrgan();
+            sql.createOrgan_Compound();
+            System.out.println("Organisms to be inserted: \n" + o.organism);
+            sql.InsertOrganism(o);
+            System.out.println("Organs to be inserted: \n" + o.organ);
+            sql.InsertOrgan(o);
+            sql.disconnect();
+        } catch (Exception h) {
+            System.out.println("\n" + h.getMessage());
+        }
+        String myPath = System.getProperty("user.dir");
+        File directorio = new File(myPath + "/" + "In our DataBase");
+        if (!directorio.exists()) {
+            directorio.mkdirs();
+        }
+        Logger logger = Logger.getLogger("There is inchi_key in our DataBase");
+        FileHandler fh;
+        Date date = new Date();
+        DateFormat hourdateFormat = new SimpleDateFormat("HH.mm.ss dd-MM-yyyy");
+        String historial = hourdateFormat.format(date);
+        String namefile = historial + "_compound.log";
+        String archivo = "/" + namefile;
+        // This block configure the logger with handler and formatter
+        fh = new FileHandler(directorio + archivo);
+        logger.addHandler(fh);
+        SimpleFormatter formatter = new SimpleFormatter();
+        fh.setFormatter(formatter);
+        try {
+            int j = 0;
+            int k = 0;
+            int p = 0;
+            int l = 0;
+            int e = 0;
+            sql.connect();
+
+            for (i = 0; i < todos2.size(); i++) {
+                int compound_id = sql.checkInchi(todos2.get(i));
+                if (compound_id == -1) {
+                    //logger.info("NAME: " + todos2.get(i).name + "   INCHIKEY: " + todos2.get(i).inchikey);
+                    k++;
+                } else {
+                    int insert = sql.InsertOrganCompound(todos2.get(i), compound_id);
+
+                    if (insert == 1) {
+                        l++;
+                        int msms_id = sql.InsertCompoundMsms(todos2.get(i), compound_id);
+                        if (msms_id != -1) {
+                            sql.InsertCompoundMsPeaks(todos2.get(i), msms_id);
+                            //System.out.println("Inserted MS/MS from compound : \n");
+                            //System.out.println(todos2.get(i));
+                            logger.info("INCHIKEY: " + todos2.get(i).inchikey + " COMPOUND_ID: " + compound_id + " MSMS_ID: " + msms_id + " NAME_ORGAN: " + todos2.get(i).organ + " NAME_ORGANISM: " + todos2.get(i).organism);
+                            p++;
+                        }
+                    } else {
+                        int msms_id = sql.InsertCompoundMsms2(todos2.get(i), compound_id);
+                        if (msms_id != -1) {
+                            sql.InsertCompoundMsPeaks(todos2.get(i), msms_id);
+                            //System.out.println("Inserted MS/MS from compound : \n");
+                            //System.out.println(todos2.get(i));
+                            logger.info("INCHIKEY: " + todos2.get(i).inchikey + " COMPOUND_ID: " + compound_id + " MSMS_ID: " + msms_id + " NAME_ORGAN: " + todos2.get(i).organ + " NAME_ORGANISM: " + todos2.get(i).organism);
+                            p++;
+                        }
+                    }
+                    j++;
+                }
+                e++;
+            }
+            System.out.println("Extracted compounds: " + e);
+            System.out.println("Compounds without compound_id in the database: " + k);
+            System.out.println("Compounds with compound_id in the database: " + j);
+            System.out.println("Relations between organ and compounds : " + l);
+            System.out.println("Inserted compounds: " + p);
+            sql.disconnect();
+        } catch (Exception h) {
+            System.out.println("\n" + h.getMessage());
+        }
     }
 }
